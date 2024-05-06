@@ -1,7 +1,7 @@
 import time
 import board
 import busio
-import adafruit_ads1x15.ads1015 as ADS
+import adafruit_ads1x15.ads1015 as ADS # adafruit-circuitpython-ads1x15 from https://github.com/adafruit/Adafruit_CircuitPython_ADS1x15.git
 from adafruit_ads1x15.analog_in import AnalogIn
 
 # Create the I2C bus
