@@ -2,6 +2,7 @@ import os
 import time
 import board
 import busio
+import pwmio
 
 import paho.mqtt.client as mqtt # paho-mqtt from https://github.com/eclipse/paho.mqtt.python.git
 import adafruit_bmp280 # adafruit-circuitpython-bmp280 from https://github.com/adafruit/Adafruit_CircuitPython_BMP280.git
@@ -15,11 +16,17 @@ from adafruit_ads1x15.analog_in import AnalogIn
 from ublox_gps import UbloxGps # sparkfun-ublox-gps from https://github.com/sparkfun/Qwiic_Ublox_Gps_Py.git
 import serial
 
+from adafruit_servokit import ServoKit # adafruit-circuitpython-servokit from https://github.com/adafruit/Adafruit_CircuitPython_ServoKit.git
+from adafruit_motor import servo # adafruit-circuitpython-motor
+
 mqtt_user = os.getenv('MQTT_USER')
 mqtt_pass = os.getenv('MQTT_PASS')
 
 mqtt_broker = "192.168.0.132"
 mqtt_port = 1883
+
+steer_angle_zero = 65
+platform_angle_zero = 90
 
 topic = {
     "lon" : "rover/position/lon",
@@ -32,13 +39,36 @@ topic = {
     "obstacle" : "rover/system/obstacle",
     "brightness" : "rover/environment/brightness",
     "temperature" : "rover/environment/temperature",
-    "pressure" : "rover/environment/pressure"
+    "pressure" : "rover/environment/pressure",
+
+    "move" : "rover/control/move",
+    "steer" : "rover/control/steer",
+    "platform" : "rover/control/platform",
 }
+
+def speed(sp):
+    p=sp/20+5
+    duty = 65535 * p // 100
+    print(duty)
+    return duty
+
+def message_recv(mqttc, obj, msg):
+    message = str(msg.payload.decode("utf-8"))
+    print(msg.topic + " " + str(msg.qos) + " " + message)
+
+    if(msg.topic==topic["move"]):
+        motor_pwm.duty_cycle = speed(13)
+        time.sleep(0.3 + int(message)*0.1)
+        motor_pwm.duty_cycle = speed(0)
+    if(msg.topic==topic["steer"]):
+        steer_servo.angle = steer_angle_zero + int(message)
+    if(msg.topic==topic["platform"]):
+        platform_servo.angle = platform_angle_zero + int(message)
 
 
 def mqtt_connect():
     mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-    mqttc.on_message = lambda mqttc, obj, msg: (print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload)))
+    mqttc.on_message = message_recv
     mqttc.on_connect = lambda mqttc, obj, flags, reason_code, properties: (print("reason_code: " + str(reason_code)))
     mqttc.on_publish = lambda mqttc, obj, mid, reason_code, properties: (print("mid: " + str(mid)))
     mqttc.on_subscribe = lambda mqttc, obj, mid, reason_code_list, properties: (print("Subscribed: " + str(mid) + " " + str(reason_code_list)))
@@ -72,6 +102,21 @@ if __name__ == '__main__':
     compass = py_qmc5883l.QMC5883L()
     compass.declination = 5.3 # magnetic declination in Vienna as of May 2024 (https://www.zamg.ac.at/cms/de/geophysik/produkte-und-services-1/online-deklinationsrechner)
     compass.calibration = [[1.011353814274526, 0.0003112697421351132, 556.2405586464367], [0.00031126974213510974, 1.0000085335949689, 3395.165166454792], [0.0, 0.0, 1.0]]
+
+    servos = ServoKit(channels=16)
+
+    steer_servo = servos.servo[2]
+    steer_servo.angle = steer_angle_zero
+
+    platform_servo = servos.servo[1]
+    platform_servo.angle = platform_angle_zero
+
+    motor_pwm = pwmio.PWMOut(board.D13, duty_cycle=speed(0),  frequency=50)
+    motor_pwm.duty_cycle = speed(0)
+
+    mqttc.subscribe(topic["move"], qos=2)
+    mqttc.subscribe(topic["steer"], qos=2)
+    mqttc.subscribe(topic["platform"], qos=2)
 
     try:
         ardusimple_port = serial.Serial('/dev/ttyACM0', baudrate=115200, timeout=1)
@@ -108,8 +153,11 @@ if __name__ == '__main__':
         infot.wait_for_publish()
         infot = mqttc.publish(topic["acc_z"], acc["z"], qos=2)
         infot.wait_for_publish()
-        infot = mqttc.publish(topic["obstacle"], sonar.distance, qos=2)
-        infot.wait_for_publish()
+        try:
+            infot = mqttc.publish(topic["obstacle"], sonar.distance, qos=2)
+            infot.wait_for_publish()
+        except RuntimeError as e:
+            print(e)
         infot = mqttc.publish(topic["brightness"], brightness, qos=2)
         infot.wait_for_publish()
         infot = mqttc.publish(topic["temperature"], bmp280.temperature, qos=2)
