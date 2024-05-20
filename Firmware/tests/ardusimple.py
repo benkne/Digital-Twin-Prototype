@@ -10,16 +10,16 @@ def run():
     print("Listenting for UBX Messages.")
     while True:
       try: 
-        coords = gps.geo_coords()
-        print(coords.lat,coords.lon)
-        #print("Heading of Motion: ", coords.headMot)
+        
 
-        #print(gps.stream_nmea())
+        print(gps.stream_nmea())
 
-        gps_time = gps.date_time()
-        print("{}/{}/{}".format(gps_time.day, gps_time.month, gps_time.year))
-        print("UTC Time {}:{}:{}".format(gps_time.hour, gps_time.min, gps_time.sec))
-        #print("Valid date:{}\nValid Time:{}".format(gps_time.valid.validDate, gps_time.valid.validTime))
+        #coords = gps.geo_coords()
+        #print(coords.lat,coords.lon)
+
+        #gps_time = gps.date_time()
+        #print("{}/{}/{}".format(gps_time.day, gps_time.month, gps_time.year))
+        #print("UTC Time {}:{}:{}".format(gps_time.hour, gps_time.min, gps_time.sec))
 
       except (ValueError, IOError) as err:
         print(err)

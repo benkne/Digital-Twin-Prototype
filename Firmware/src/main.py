@@ -3,6 +3,7 @@ import time
 import board
 import busio
 import pwmio
+import threading
 
 import paho.mqtt.client as mqtt # paho-mqtt from https://github.com/eclipse/paho.mqtt.python.git
 import adafruit_bmp280 # adafruit-circuitpython-bmp280 from https://github.com/adafruit/Adafruit_CircuitPython_BMP280.git
@@ -46,6 +47,12 @@ topic = {
     "platform" : "rover/control/platform",
 }
 
+gps_data = {
+    "lon" : None,
+    "lat" : None,
+    "timestamp" : None
+}
+
 def speed(sp):
     p=sp/20+5
     duty = 65535 * p // 100
@@ -83,6 +90,16 @@ def mqtt_connect():
 
     return mqttc
 
+def read_gps():
+        try:
+            while(True):
+                coords = gps.geo_coords()
+                gps_time = gps.date_time()
+                gps_data["timestamp"] = gps_time
+                gps_data["lon"] = coords.lon
+                gps_data["lat"] = coords.lat
+        except (ValueError, IOError) as err:
+            print(err)
 
 if __name__ == '__main__':
     mqttc = mqtt_connect()
@@ -125,47 +142,49 @@ if __name__ == '__main__':
         print("Ardusimple not connected!")
         gps = None
 
+    if(gps!=None):
+        gps_thread = threading.Thread(target=read_gps)
+        gps_thread.start()
+
     while(True):
         ldr_resistance = (3.3-ldr.voltage)/ldr.voltage * 2200
         brightness = 12518931 * pow(ldr_resistance,-1.405) # Regression approximation from https://www.allaboutcircuits.com/projects/design-a-luxmeter-using-a-light-dependent-resistor/
     
         acc = mpu.get_accel_data()
 
-        if(gps!=None):
-            try:
-                coords = gps.geo_coords()
-                gps_time = gps.date_time()
+        if(gps_data["timestamp"]!=None):
+            infot = mqttc.publish(topic["timestamp"], "UTC Time {}:{}:{}".format(gps_data["timestamp"].hour, gps_data["timestamp"].min, gps_data["timestamp"].sec), qos=2)
+            infot.wait_for_publish()
+        if(gps_data["lon"]!=None):
+            infot = mqttc.publish(topic["lon"], round(gps_data["lon"], 6), qos=2)
+            infot.wait_for_publish()
+        if(gps_data["lat"]!=None):
+            infot = mqttc.publish(topic["lat"], round(gps_data["lat"], 6), qos=2)
+            infot.wait_for_publish()
 
-                infot = mqttc.publish(topic["timestamp"], "UTC Time {}:{}:{}".format(gps_time.hour, gps_time.min, gps_time.sec), qos=2)
-                infot.wait_for_publish()
-                infot = mqttc.publish(topic["lon"], coords.lon, qos=2)
-                infot.wait_for_publish()
-                infot = mqttc.publish(topic["lat"], coords.lat, qos=2)
-                infot.wait_for_publish()
-            except (ValueError, IOError) as err:
-                print(err)
-
-        infot = mqttc.publish(topic["heading"], compass.get_bearing(), qos=2)
+        infot = mqttc.publish(topic["heading"], round(compass.get_bearing(), 1), qos=2)
         infot.wait_for_publish()
-        infot = mqttc.publish(topic["acc_x"], acc["x"], qos=2)
+        infot = mqttc.publish(topic["acc_x"], round(acc["x"], 1), qos=2)
         infot.wait_for_publish()
-        infot = mqttc.publish(topic["acc_y"], acc["y"], qos=2)
+        infot = mqttc.publish(topic["acc_y"], round(acc["y"], 1), qos=2)
         infot.wait_for_publish()
-        infot = mqttc.publish(topic["acc_z"], acc["z"], qos=2)
+        infot = mqttc.publish(topic["acc_z"], round(acc["z"], 1), qos=2)
         infot.wait_for_publish()
         try:
-            infot = mqttc.publish(topic["obstacle"], sonar.distance, qos=2)
+            infot = mqttc.publish(topic["obstacle"], round(sonar.distance, 1), qos=2)
             infot.wait_for_publish()
         except RuntimeError as e:
             print(e)
-        infot = mqttc.publish(topic["brightness"], brightness, qos=2)
+        infot = mqttc.publish(topic["brightness"], round(brightness, 1), qos=2)
         infot.wait_for_publish()
-        infot = mqttc.publish(topic["temperature"], bmp280.temperature, qos=2)
+        infot = mqttc.publish(topic["temperature"], round(bmp280.temperature, 1), qos=2)
         infot.wait_for_publish()
-        infot = mqttc.publish(topic["pressure"], bmp280.pressure, qos=2)
+        infot = mqttc.publish(topic["pressure"], round(bmp280.pressure, 1), qos=2)
         infot.wait_for_publish()
 
         time.sleep(0.5)
+
+    gps_thread.join()
 
     mqttc.disconnect()
     mqttc.loop_stop()
