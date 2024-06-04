@@ -1,0 +1,121 @@
+UID: mqtt:topic:0c36292612:7a266b0aae
+label: rover
+thingTypeUID: mqtt:topic
+configuration: {}
+bridgeUID: mqtt:broker:0c36292612
+location: rover
+channels:
+  - id: temperature
+    channelTypeUID: mqtt:number
+    label: temperature
+    description: ""
+    configuration:
+      qos: 2
+      stateTopic: rover/environment/temperature
+      unit: °C
+  - id: pressure
+    channelTypeUID: mqtt:number
+    label: pressure
+    description: ""
+    configuration:
+      qos: 2
+      stateTopic: rover/environment/pressure
+      unit: hPa
+  - id: brightness
+    channelTypeUID: mqtt:number
+    label: brightness
+    description: ""
+    configuration:
+      qos: 2
+      stateTopic: rover/environment/brightness
+      unit: lx
+  - id: heading
+    channelTypeUID: mqtt:number
+    label: heading
+    description: ""
+    configuration:
+      qos: 2
+      stateTopic: rover/position/heading
+  - id: longitude
+    channelTypeUID: mqtt:number
+    label: longitude
+    description: ""
+    configuration:
+      qos: 2
+      stateTopic: rover/position/lon
+  - id: latitude
+    channelTypeUID: mqtt:number
+    label: latitude
+    description: ""
+    configuration:
+      qos: 2
+      stateTopic: rover/position/lat
+  - id: timestamp
+    channelTypeUID: mqtt:datetime
+    label: timestamp
+    description: ""
+    configuration:
+      qos: 2
+      stateTopic: rover/system/timestamp
+  - id: obstacle
+    channelTypeUID: mqtt:number
+    label: obstacle
+    description: ""
+    configuration:
+      qos: 2
+      stateTopic: rover/system/obstacle
+      unit: cm
+  - id: acc_x
+    channelTypeUID: mqtt:number
+    label: acc_x
+    description: ""
+    configuration:
+      qos: 2
+      stateTopic: rover/system/acc_x
+      unit: m/s²
+  - id: acc_z
+    channelTypeUID: mqtt:number
+    label: acc_z
+    description: ""
+    configuration:
+      qos: 2
+      stateTopic: rover/system/acc_z
+      unit: m/s²
+  - id: acc_y
+    channelTypeUID: mqtt:number
+    label: acc_y
+    description: ""
+    configuration:
+      qos: 2
+      stateTopic: rover/system/acc_y
+      unit: m/s²
+  - id: plattform
+    channelTypeUID: mqtt:number
+    label: plattform
+    description: ""
+    configuration:
+      commandTopic: rover/control/platform
+      min: 0
+      qos: 2
+      stateTopic: rover/control/platform
+      max: 45
+  - id: steer
+    channelTypeUID: mqtt:number
+    label: steer
+    description: ""
+    configuration:
+      commandTopic: rover/control/steer
+      min: -30
+      qos: 2
+      stateTopic: rover/control/steer
+      max: 30
+  - id: move
+    channelTypeUID: mqtt:number
+    label: move
+    description: ""
+    configuration:
+      commandTopic: rover/control/move
+      min: 0
+      qos: 2
+      stateTopic: rover/control/move
+      max: 2

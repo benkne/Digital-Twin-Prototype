@@ -1,0 +1,23 @@
+UID: mqtt:broker:0c36292612
+label: MQTT Broker
+thingTypeUID: mqtt:broker
+configuration:
+  lwtQos: 2
+  publickeypin: true
+  clientid: f5aa5521-82bf-4a31-9276-3491270838ab
+  keepAlive: 60
+  hostnameValidated: true
+  birthRetain: true
+  secure: false
+  certificatepin: true
+  shutdownRetain: true
+  password: base
+  protocol: TCP
+  qos: 0
+  reconnectTime: 60000
+  port: 1883
+  mqttVersion: V3
+  host: 192.168.0.132
+  lwtRetain: true
+  enableDiscovery: true
+  username: base
