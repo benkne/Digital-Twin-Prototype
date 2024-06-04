@@ -4,6 +4,7 @@ import board
 import busio
 import pwmio
 import threading
+from datetime import datetime
 
 import paho.mqtt.client as mqtt # paho-mqtt from https://github.com/eclipse/paho.mqtt.python.git
 import adafruit_bmp280 # adafruit-circuitpython-bmp280 from https://github.com/adafruit/Adafruit_CircuitPython_BMP280.git
@@ -23,11 +24,12 @@ from adafruit_motor import servo # adafruit-circuitpython-motor
 mqtt_user = os.getenv('MQTT_USER')
 mqtt_pass = os.getenv('MQTT_PASS')
 
+
 mqtt_broker = "192.168.0.132"
 mqtt_port = 1883
 
 steer_angle_zero = 65
-platform_angle_zero = 90
+platform_angle_zero = 0
 
 topic = {
     "lon" : "rover/position/lon",
@@ -53,6 +55,14 @@ gps_data = {
     "timestamp" : None
 }
 
+obstacle_distance = None
+
+acc_calibration = {
+    "x_corr" : -0.6,
+    "y_corr" : -0.4,
+    "z_corr" : 0.8
+}
+
 def speed(sp):
     p=sp/20+5
     duty = 65535 * p // 100
@@ -64,13 +74,14 @@ def message_recv(mqttc, obj, msg):
     print(msg.topic + " " + str(msg.qos) + " " + message)
 
     if(msg.topic==topic["move"]):
-        motor_pwm.duty_cycle = speed(13)
-        time.sleep(0.3 + int(message)*0.1)
+        if(obstacle_distance==None or obstacle_distance>50): # only move if there is no obstacle within 50cm
+            motor_pwm.duty_cycle = speed(13)
+            time.sleep(0.3 + float(message)*0.1)
         motor_pwm.duty_cycle = speed(0)
     if(msg.topic==topic["steer"]):
         steer_servo.angle = steer_angle_zero + int(message)
     if(msg.topic==topic["platform"]):
-        platform_servo.angle = platform_angle_zero + int(message)
+        platform_servo.angle = platform_angle_zero + int((int(message)*180/45))
 
 
 def mqtt_connect():
@@ -95,7 +106,7 @@ def read_gps():
             while(True):
                 coords = gps.geo_coords()
                 gps_time = gps.date_time()
-                gps_data["timestamp"] = gps_time
+                gps_data["timestamp"] = datetime(gps_time.year, gps_time.month, gps_time.day, gps_time.hour, gps_time.min, gps_time.sec).strftime('%Y-%m-%dT%H:%M:%SZ')
                 gps_data["lon"] = coords.lon
                 gps_data["lat"] = coords.lat
         except (ValueError, IOError) as err:
@@ -131,6 +142,15 @@ if __name__ == '__main__':
     motor_pwm = pwmio.PWMOut(board.D13, duty_cycle=speed(0),  frequency=50)
     motor_pwm.duty_cycle = speed(0)
 
+    # publish default values of control parameters
+    infot = mqttc.publish(topic["move"], 0, qos=2)
+    infot.wait_for_publish()
+    infot = mqttc.publish(topic["steer"], 0, qos=2)
+    infot.wait_for_publish()
+    infot = mqttc.publish(topic["platform"], 0, qos=2)
+    infot.wait_for_publish()
+
+    
     mqttc.subscribe(topic["move"], qos=2)
     mqttc.subscribe(topic["steer"], qos=2)
     mqttc.subscribe(topic["platform"], qos=2)
@@ -153,7 +173,7 @@ if __name__ == '__main__':
         acc = mpu.get_accel_data()
 
         if(gps_data["timestamp"]!=None):
-            infot = mqttc.publish(topic["timestamp"], "UTC Time {}:{}:{}".format(gps_data["timestamp"].hour, gps_data["timestamp"].min, gps_data["timestamp"].sec), qos=2)
+            infot = mqttc.publish(topic["timestamp"], gps_data["timestamp"], qos=2)
             infot.wait_for_publish()
         if(gps_data["lon"]!=None):
             infot = mqttc.publish(topic["lon"], round(gps_data["lon"], 6), qos=2)
@@ -164,16 +184,18 @@ if __name__ == '__main__':
 
         infot = mqttc.publish(topic["heading"], round(compass.get_bearing(), 1), qos=2)
         infot.wait_for_publish()
-        infot = mqttc.publish(topic["acc_x"], round(acc["x"], 1), qos=2)
+        infot = mqttc.publish(topic["acc_x"], round(acc["x"]+acc_calibration["x_corr"],1), qos=2)
         infot.wait_for_publish()
-        infot = mqttc.publish(topic["acc_y"], round(acc["y"], 1), qos=2)
+        infot = mqttc.publish(topic["acc_y"], round(acc["y"]+acc_calibration["y_corr"],1), qos=2)
         infot.wait_for_publish()
-        infot = mqttc.publish(topic["acc_z"], round(acc["z"], 1), qos=2)
+        infot = mqttc.publish(topic["acc_z"], round(acc["z"]+acc_calibration["z_corr"],1), qos=2)
         infot.wait_for_publish()
         try:
-            infot = mqttc.publish(topic["obstacle"], round(sonar.distance, 1), qos=2)
+            obstacle_distance=round(sonar.distance, 1)
+            infot = mqttc.publish(topic["obstacle"], obstacle_distance, qos=2)
             infot.wait_for_publish()
-        except RuntimeError as e:
+        except Exception as e:
+            obstacle_distance=None
             print(e)
         infot = mqttc.publish(topic["brightness"], round(brightness, 1), qos=2)
         infot.wait_for_publish()
