@@ -1,0 +1,15 @@
+{
+  "thingId": "control.rover:steer",
+  "policyId": "ditto.default:policy",
+  "attributes": {
+    "name": "steer",
+    "type": "control"
+  },
+  "features": {
+    "value": {
+      "properties": {
+        "value": "0"
+      }
+    }
+  }
+}

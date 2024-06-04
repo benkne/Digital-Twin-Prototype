@@ -1,0 +1,15 @@
+{
+  "thingId": "system.rover:acc_z",
+  "policyId": "ditto.default:policy",
+  "attributes": {
+    "name": "acc_z",
+    "type": "system"
+  },
+  "features": {
+    "value": {
+      "properties": {
+        "value": "10.0"
+      }
+    }
+  }
+}

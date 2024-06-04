@@ -1,0 +1,15 @@
+{
+  "thingId": "position.rover:heading",
+  "policyId": "ditto.default:policy",
+  "attributes": {
+    "name": "heading",
+    "type": "position"
+  },
+  "features": {
+    "value": {
+      "properties": {
+        "value": "228.7"
+      }
+    }
+  }
+}

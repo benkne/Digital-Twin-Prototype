@@ -1,0 +1,15 @@
+{
+  "thingId": "control.rover:platform",
+  "policyId": "ditto.default:policy",
+  "attributes": {
+    "name": "platform",
+    "type": "control"
+  },
+  "features": {
+    "value": {
+      "properties": {
+        "value": "0"
+      }
+    }
+  }
+}

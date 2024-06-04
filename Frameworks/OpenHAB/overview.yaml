@@ -1,0 +1,178 @@
+config:
+  label: System Overview
+blocks:
+  - component: oh-block
+    config: {}
+    slots:
+      default:
+        - component: oh-grid-row
+          config: {}
+          slots:
+            default: []
+        - component: oh-grid-cells
+          config: {}
+          slots:
+            default:
+              - component: oh-label-cell
+                config:
+                  action: analyzer
+                  actionAnalyzerItems:
+                    - brightness
+                  expandable: false
+                  item: brightness
+                  stateAsHeader: true
+                  title: brightness
+                  trendItem: brightness
+              - component: oh-label-cell
+                config:
+                  action: analyzer
+                  actionAnalyzerItems:
+                    - pressure
+                  expandable: false
+                  item: pressure
+                  stateAsHeader: true
+                  title: pressure
+                  trendItem: pressure
+              - component: oh-label-cell
+                config:
+                  action: analyzer
+                  actionAnalyzerItems:
+                    - temperature
+                  expandable: false
+                  item: temperature
+                  stateAsHeader: true
+                  title: temperature
+                  trendItem: temperature
+  - component: oh-block
+    config: {}
+    slots:
+      default:
+        - component: oh-grid-cells
+          config: {}
+          slots:
+            default:
+              - component: oh-label-cell
+                config:
+                  action: analyzer
+                  actionAnalyzerItems:
+                    - heading
+                  expandable: false
+                  item: heading
+                  stateAsHeader: true
+                  title: heading
+                  trendItem: heading
+              - component: oh-label-cell
+                config:
+                  action: analyzer
+                  actionAnalyzerItems:
+                    - longitude
+                  expandable: false
+                  item: longitude
+                  stateAsHeader: true
+                  title: longitude
+                  trendItem: longitude
+              - component: oh-label-cell
+                config:
+                  action: analyzer
+                  actionAnalyzerItems:
+                    - latitude
+                  expandable: false
+                  item: latitude
+                  stateAsHeader: true
+                  title: latitude
+                  trendItem: latitude
+  - component: oh-block
+    config: {}
+    slots:
+      default:
+        - component: oh-grid-cells
+          config: {}
+          slots:
+            default:
+              - component: oh-label-cell
+                config:
+                  expandable: false
+                  item: timestamp
+                  stateAsHeader: true
+                  title: timestamp
+              - component: oh-label-cell
+                config:
+                  action: analyzer
+                  actionAnalyzerItems:
+                    - obstacle
+                  expandable: false
+                  item: obstacle
+                  stateAsHeader: true
+                  title: obstacle
+                  trendItem: obstacle
+              - component: oh-label-cell
+                config:
+                  action: analyzer
+                  actionAnalyzerItems:
+                    - acc_x
+                  expandable: false
+                  item: acc_x
+                  stateAsHeader: true
+                  title: acc_x
+                  trendItem: acc_x
+              - component: oh-label-cell
+                config:
+                  action: analyzer
+                  actionAnalyzerItems:
+                    - acc_y
+                  expandable: false
+                  item: acc_y
+                  stateAsHeader: true
+                  title: acc_y
+                  trendItem: acc_y
+              - component: oh-label-cell
+                config:
+                  action: analyzer
+                  actionAnalyzerItems:
+                    - acc_z
+                  expandable: false
+                  item: acc_z
+                  stateAsHeader: true
+                  title: acc_z
+                  trendItem: acc_z
+  - component: oh-block
+    config: {}
+    slots:
+      default:
+        - component: oh-grid-cells
+          config: {}
+          slots:
+            default:
+              - component: oh-slider-card
+                config:
+                  actionItem: plattform
+                  commandInterval: -1
+                  item: plattform
+                  max: 45
+                  min: 0
+                  scale: true
+                  step: 1
+                  title: platform
+              - component: oh-slider-card
+                config:
+                  item: rover_steer
+                  max: 30
+                  min: -30
+                  scale: true
+                  step: 2
+                  title: steer
+              - component: oh-knob-card
+                config:
+                  item: move
+                  max: 2
+                  min: 0
+                  releaseOnly: true
+                  step: 0.1
+                  title: move
+  - component: oh-block
+    config: {}
+    slots:
+      default: []
+masonry: []
+grid: null
+canvas: null

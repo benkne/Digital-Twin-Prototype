@@ -1,0 +1,15 @@
+{
+  "thingId": "position.rover:lat",
+  "policyId": "ditto.default:policy",
+  "attributes": {
+    "name": "latitude",
+    "type": "position"
+  },
+  "features": {
+    "value": {
+      "properties": {
+        "value": "48.473736"
+      }
+    }
+  }
+}

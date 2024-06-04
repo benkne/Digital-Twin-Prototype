@@ -1,0 +1,15 @@
+{
+  "thingId": "environment.rover:pressure",
+  "policyId": "ditto.default:policy",
+  "attributes": {
+    "name": "pressure",
+    "type": "environment"
+  },
+  "features": {
+    "value": {
+      "properties": {
+        "value": "984.8"
+      }
+    }
+  }
+}

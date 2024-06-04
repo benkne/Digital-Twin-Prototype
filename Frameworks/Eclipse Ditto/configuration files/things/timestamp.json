@@ -1,0 +1,15 @@
+{
+  "thingId": "system.rover:timestamp",
+  "policyId": "ditto.default:policy",
+  "attributes": {
+    "name": "timestamp",
+    "type": "system"
+  },
+  "features": {
+    "value": {
+      "properties": {
+        "value": "2024-06-04T17:17:52Z"
+      }
+    }
+  }
+}

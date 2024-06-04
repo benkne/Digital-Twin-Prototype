@@ -1,0 +1,15 @@
+{
+  "thingId": "control.rover:move",
+  "policyId": "ditto.default:policy",
+  "attributes": {
+    "name": "move",
+    "type": "control"
+  },
+  "features": {
+    "value": {
+      "properties": {
+        "value": "0"
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "id": "ece162c1-7f7b-405a-8c5d-9eaca60092f9",
+  "name": null,
+  "connectionType": "mqtt",
+  "connectionStatus": "open",
+  "uri": "tcp://base:base@192.168.0.132:1883",
+  "sources": [
+    {
+      "addresses": [
+        "rover/#"
+      ],
+      "consumerCount": 1,
+      "qos": 2,
+      "authorizationContext": [
+        "nginx:ditto"
+      ],
+      "headerMapping": {},
+      "payloadMapping": [
+        "javascript"
+      ],
+      "replyTarget": {
+        "address": "{{header:reply-to}}",
+        "headerMapping": {},
+        "expectedResponseTypes": [
+          "response",
+          "error"
+        ],
+        "enabled": true
+      }
+    }
+  ],
+  "targets": [
+    {
+      "address": "rover/control/{{ thing:name }}",
+      "topics": [
+        "_/_/things/twin/events",
+        "_/_/things/live/messages"
+      ],
+      "qos": 2,
+      "authorizationContext": [
+        "nginx:ditto"
+      ],
+      "headerMapping": {},
+      "payloadMapping": [
+        "javascript"
+      ]
+    }
+  ],
+  "clientCount": 1,
+  "failoverEnabled": true,
+  "validateCertificates": true,
+  "processorPoolSize": 1,
+  "mappingDefinitions": {
+    "javascript": {
+      "mappingEngine": "JavaScript",
+      "options": {
+        "incomingScript": "function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) {\n    const payload = String.fromCharCode.apply(null, new Uint8Array(bytePayload));\n    const topic  = headers[\"mqtt.topic\"].split('/')\n    const value = { \n        value: { \n            properties: { \n                value: payload\n            } \n        } \n    };    \n    return Ditto.buildDittoProtocolMsg(\n        topic[1]+'.'+topic[0], // your namespace \n        topic[2], \n        'things', // we deal with a thing\n        'twin', // we want to update the twin\n        'commands', // create a command to update the twin\n        'modify', // modify the twin\n        '/features', // modify all features at once\n        headers, \n        value\n    );\n}",
+        "outgoingScript": "function mapFromDittoProtocolMsg(\n  namespace,\n  name,\n  group,\n  channel,\n  criterion,\n  action,\n  path,\n  dittoHeaders,\n  value,\n  status,\n  extra\n) {\n\n  // ###\n  // Insert your mapping logic here\n  // ### example code using the Ditto protocol content type.\n  let headers = dittoHeaders;\n  let textPayload = value.toString();\n  let bytePayload = null;\n  let contentType = 'application/vnd.eclipse.ditto+json';\n  return Ditto.buildExternalMsg(\n    headers, // The external headers Object containing header values\n    textPayload, // The external mapped String\n    bytePayload, // The external mapped byte[]\n    contentType // The returned Content-Type\n  );\n}"
+      }
+    }
+  },
+  "tags": []
+}

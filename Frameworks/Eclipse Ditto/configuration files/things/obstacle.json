@@ -1,0 +1,15 @@
+{
+  "thingId": "system.rover:obstacle",
+  "policyId": "ditto.default:policy",
+  "attributes": {
+    "name": "obstacle",
+    "type": "system"
+  },
+  "features": {
+    "value": {
+      "properties": {
+        "value": "133.9"
+      }
+    }
+  }
+}

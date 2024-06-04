@@ -1,0 +1,15 @@
+{
+  "thingId": "environment.rover:temperature",
+  "policyId": "ditto.default:policy",
+  "attributes": {
+    "name": "temperature",
+    "type": "environment"
+  },
+  "features": {
+    "value": {
+      "properties": {
+        "value": "23.0"
+      }
+    }
+  }
+}
