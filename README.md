@@ -1,1 +1,7 @@
 # Digital-Twin-Prototype
+
+Digital Twins have great potential to optimize modern systems. The growing digitalization of agricultural processes enables efficient management through Digital Twins. By integrating Digital Twins into autonomous field robots, virtual images of the systems are created, which can be used to monitor and control the real systems in a targeted manner. The digitalization of agriculture has increased significantly in recent years, but yet only a few autonomous vehicles are in use.
+
+To develop autonomous systems, frameworks can be used to integrate Digital Twins into field robots. This thesis evaluates suitable frameworks that allow a virtual representation of a mobile robot. Using a specially developed prototype, the system development process from the original specification of the requirements to the integration of a digital twin is evaluated using the selected open-source frameworks OpenHAB and Eclipse Ditto.
+
+The developed field robot meets most of the hardware and software requirements. With OpenHAB, it is possible to visualize real-time data via a user interface and to manually control the prototype. Moreover, a Digital Twin is implemented via Eclipse Ditto, which can be accessed externally via an API. The results show that the specific requirements of field robots are met by the integration of Digital Twins using selected open source frameworks.
