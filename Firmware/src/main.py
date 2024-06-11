@@ -4,6 +4,7 @@ import board
 import busio
 import pwmio
 import threading
+import subprocess
 from datetime import datetime
 
 import paho.mqtt.client as mqtt # paho-mqtt from https://github.com/eclipse/paho.mqtt.python.git
@@ -24,9 +25,14 @@ from adafruit_motor import servo # adafruit-circuitpython-motor
 mqtt_user = os.getenv('MQTT_USER')
 mqtt_pass = os.getenv('MQTT_PASS')
 
-
 mqtt_broker = "192.168.0.132"
 mqtt_port = 1883
+
+serial_port = "/dev/ttyACM0"
+serial_baud = 115200
+
+ntrip_user = os.getenv('APOS_USER')
+ntrip_pass = os.getenv('APOS_PASS')
 
 steer_angle_zero = 65
 platform_angle_zero = 0
@@ -156,8 +162,22 @@ if __name__ == '__main__':
     mqttc.subscribe(topic["platform"], qos=2)
 
     try:
-        ardusimple_port = serial.Serial('/dev/ttyACM0', baudrate=115200, timeout=1)
+        ardusimple_port = serial.Serial(serial_port, baudrate=serial_baud, timeout=1)
         gps = UbloxGps(ardusimple_port)
+
+        ntripclient = [
+            os.path.expanduser("/home/benkne/Documents/ntripclient/ntripclient"), # ntripclient from https://github.com/nunojpg/ntripclient.git
+            "-s", "217.13.180.215",
+            "-u", ntrip_user,
+            "-p", ntrip_pass,
+            "-r", "2201",
+            "-D", serial_port,
+            "-B", str(serial_baud),
+            "-m", "APOS_Extended"
+        ]
+        ntrip_pid = subprocess.Popen(ntripclient, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print("Ntrip Client has PID "+str(ntrip_pid.pid))
+
     except serial.SerialException as e:
         print("Ardusimple not connected!")
         gps = None
